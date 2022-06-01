@@ -1,0 +1,129 @@
+= Spring for architecturally curious developers
+
+This repository contains the sample code for my talk / workshop "Spring for architecturally curious developers".
+It does not use a stable commit history but rather a commit per step in the demo that can be referred to via a tag.
+This means that all tags starting with `steps/…` are not stable either.
+If you're looking for the state of the project for a particular event, skim through the tags starting with `events/…`.
+They keep a reference to the latest commit of the codebase for that particular event.
+
+== Demo
+
+=== Step 0 -- Starting point
+
+.Goals
+****
+After this step you should…
+
+* … understand how Moduliths guides developers in structuring their Spring Boot applications
+* … be familiar with the concept of architectural observability: being able to get a high-level understanding of the logical, business related parts of application and how they interact with each other.
+****
+
+==== Preparation
+* `$ git checkout step/0`
+* Open `src/main/asciidoc/index.adoc` in browser with Asciidoctor plugin installed.
+
+==== Application overview
+* Three logical modules `customer`, `order`, `inventory` with internal and cross-module bean references.
+* All application components public -> increases risk of unwanted cross-module dependencies.
+* The order module refers to a customer identifier (aggregate structure reference only), but also to the inventory via a bean reference.
+* `ModularityTests` -- creates documentation based on the module conventions and verifies the general structure.
+
+==== A -- Component references and visibility
+
+* Show how the public Spring components appear in the documentation.
+  Make connection to type visibility and API packages.
+* Tweak visibility of `InventoryRepository` to package private -> disappears.
+* Introduce interface for `Inventory` -> documentation changes.
+* Move `InventoryRepository` into `internal` package -> disappears as it is not located in an API package anymore.
+** Introduce dependency on it from `OrderManagement` and show how verification detects the violation.
+
+==== B -- Module integration tests
+
+* `InventoryIntegrationTests` -- Show log output.
+Component scanning and auto-configuration restricted to only the `inventory` package.
+* `OrderIntegrationTests` -- Show `@MockBean` and how the bootstrap fails if it is removed.
+
+=== Step 1 -- jMolecules
+
+.Goals
+****
+After this step, you should understand…
+
+* … how jMolecules helps you to avoid dependencies to Spring-specific annotations in application components.
+* … how it allows you to work with DDD building blocks in the source code explicitly.
+* … how these concepts expressed in the sources enable derivation of documentation and removal of boilerplate infrastructure technology mapping configuration.
+****
+
+==== Preparation
+* `$ git checkout step/1`
+
+==== Observations
+
+* jMolecules dependencies added for both APIs and integrations projects.
+* JPA-mapped entities have default mappings and boilerplate removed but implement model types (`AggregateRoot`, `Entity`)
+* Application components have switched to jMolecules annotations.
+
+==== A -- Run integration tests
+* Run `OrderModuleIntegrationTests`.
+Still works.
+Why?
+* Run `mvn clean test-compile` in the console and show log output, ByteBuddy plugin.
+Transforms both the jMolecules annotations into the Spring-specific ones and defaults and optimizes the JPA mappings.
+
+=== Step 2 -- Refactor cycle
+
+.Goals
+****
+After this step, you should understand…
+
+* … how to replace a Spring bean invocation with an event publication to increase the cohesion of an application module.
+* … how that affects testing in a way that they stay focused on the module to test as the side effect ends in that very module.
+****
+
+==== Preparation
+* `$ git checkout step/2`
+
+==== Intro
+* `OrderManagement` actively triggers `Inventory`.
+ Order completion is a point of functional gravity that will also attract other tangential functionality: calculating rewards points for completed orders, sending confirmation emails etc.
+* The potentially to be handed over parameter creates a module cycle. 😣
+
+==== Observations
+
+* We register a domain event from `Order.complete()` and implicitly publish it through the `…save(…)` call on the repository.
+* We remove the dependency from `OrderManagement` to `Inventory`.
+* We change our test case to remove the mock for `Inventory` and rather test for the event publication only.
+  The side effect of the business operations ends _within_ the module.
+* The event publication and listening is reflected in the generated documentation.
+
+=== Step 3 -- Event publication registry
+
+.Goals
+****
+After this step, you should understand…
+
+* … how handling events in an asynchronous, transactional event listener might be subject to data loss unless handled properly
+* … how to use Spring Modulith's event publication registry implementation to prevent this
+****
+
+==== Preparation
+* `$ git checkout step/3`
+
+==== Intro
+* Slides on transactional application events
+
+==== Observations
+* Show added dependencies
+* Show `EventPublicationRegistryTests`
+** Registers a failing, asynchronous, transactional event listener
+* Execute `EventPublicationRegistryTests`
+** Log output shows registry tables created and populated
+** Shutdown shows outstanding event publications
+
+== Nerd stuff
+
+A couple of useful scripts to be found in `etc`:
+
+* `retag.sh` -- execute each time you change something about an individual commit to update the `steps/…` tags to be used in demos.
+* `test-all-commits.sh` -- runs the Maven build for all commits of the main branch.
+* `test-all-tags.sh` -- runs the Maven build for all `step/…` tags.
