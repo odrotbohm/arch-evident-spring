@@ -1,0 +1,225 @@
+= Spring Modulith -- Building Spring Applications for Architecturally Curious Developers
+
+This repository contains the sample code for my talk / workshop "Spring for architecturally curious developers".
+It does not use a stable commit history but rather a commit per step in the demo that can be referred to via a tag.
+This means that all tags starting with `steps/…` are not stable either.
+If you're looking for the state of the project for a particular event, skim through the tags starting with `events/…`.
+They keep a reference to the latest commit of the codebase for that particular event.
+
+== Demo
+
+=== Step 0 -- Spring Modulith Project Skeleton
+
+.Goals
+****
+After this step you should…
+
+* … understand how Spring Modulith guides developers in structuring their Spring Boot applications
+* … be familiar with the concept of architectural observability: being able to get a high-level understanding of the logical, functional parts of application and how they interact with each other.
+****
+
+==== Preparation
+* `$ git checkout step/0`
+* Run `./etc/prepare-talk.sh` (Opens `src/main/asciidoc/index.adoc` in browser with Asciidoctor plugin installed).
+
+==== Application Overview
+* Three logical application modules `customer`, `order`, `inventory` representing the functional blocks of our application.
+* The order module refers to a customer identifier (aggregate structure reference only)
+* `ModularityTests` -- creates documentation based on the module conventions and verifies the general structure.
+
+==== A -- Component References and Visibility
+
+* Run documentation tests of `ModularityTest`.
+** Show how the public Spring components appear in the documentation: component diagrams and Application Module Canvases (AMC).
+** Reference `Order` -> `CustomIdentifier` is reflected in the component relationships with a _depends-on_-relationship.
+
+* Introduce `OrderManagement` -> `Inventory` dependency to invoke it from `OrderManagement.complete(…)`.
+** Show how the relationship is reflected in the component diagram as _uses_-relationship.
+
+* Introduce public `InventoryRepository` as inventory-internal component.
+** Show how it appears in the AMC.
+** Introduce invalid dependency from `OrderManagement`.
+*** Option A -- Make it package private.
+    Component disappears from AMC and cannot be referred to, as enforced by the compiler.
+*** Option B -- Move type into sub-package.
+    Component disappears from AMC but can still be referred to.
+**** Run `ModularityTests.verifyModularity()` and see the reference causing the test to fail as an internal component is referenced.
+
+* Additional discussion
+** Further details of verification
+*** No cyclic dependencies
+*** No field injection
+*** jMolecules verifications (DDD building blocks)
+
+==== Segue
+
+* Application module model used for verification can be used to isolate integration tests.
+
+==== B -- Application Module Integration Tests
+
+* Run `InventoryIntegrationTests` -- Show log output.
+  Component scanning and auto-configuration restricted to only the `inventory` package.
+* Run `OrderIntegrationTests` -- The tests fails as the bean reference to `Inventory` cannot be satisfied
+** Option A -- Use `@MockBean` to include a mock in the bootstrap.
+** Option B -- Use `@ApplicationModuleTest(bootstrapMode = …)` to include the inventory module in the bootstrap.
+
+* Additional discussion
+** Domain model relationships important.
+   Cross-references only into aggregate roots via identifiers.
+
+==== Segue
+
+* Point out that `OrderIntegrationTests` tests basic persistence and show JPA boilerplate annotations
+
+=== Step 1 -- Fully-implemented Application Modules (optional)
+
+.Goals
+****
+After this step you should understand…
+
+* … the downsides of application module integration via bean references.
+****
+
+==== Preparation
+* `$ git checkout step/1`
+* Run `ModularityTests.renderDocumentation()`.
+
+==== Intro
+
+* Application modules encapsulate internals using package private components.
+* Inventory exposes configuration properties that are documented in the AMC.
+
+==== Observations
+
+* `OrderManagement` actively triggers `Inventory`.
+  Order completion is a point of functional gravity that will also attract other tangential functionality: calculating rewards points for completed orders, sending confirmation emails etc.
+  Integration is synchronous, causes the transaction to expand (violates DDD principle of aggregate being the scope of strong consistency) and increases the risk of primary business functionality to break because of failure in attached functionality.
+* The actually required `Order` parameter for `Inventory.updateStock()` creates a module cycle. 😣
+* Tests require mocks for all cross-application-module bean references.
+
+==== Segue
+
+* Is there a different way to integrate the application modules?
+
+=== Step 2 -- Event-based Application Module Integration
+
+.Goals
+****
+After this step, you should understand…
+
+* … how to replace a Spring bean invocation with an event publication to increase the cohesion of an application module.
+* … how that affects testing in a way that they stay focused on the module to test as the side effect ends in that very module.
+****
+
+==== Preparation
+* `$ git checkout step/2`
+* Run `ModularityTests.renderDocumentation()`.
+
+==== Intro
+
+* We register a domain event from `Order.complete()` and implicitly publish it through the `….save(…)` call on the repository.
+* We removed the dependency from `OrderManagement` to `Inventory`.
+* We changed our test case to remove the mock for `Inventory` and rather test for the event publication only.
+  The side effect of the business operations ends _within_ the module.
+* The event publication and listening is reflected in the generated documentation.
+
+==== Observation
+
+* Integration model changed
+* Consistency guarantees stay the same (Inventory can break transaction)
+
+=== Step 3 -- Switch to `@ApplicationModuleListener`
+
+==== Preparation
+* `$ git checkout step/3`
+* Run `ModularityTests.renderDocumentation()`.
+
+==== Intro
+* Show `Inventory.updateStock(OrderCompletedEvent)` and discuss how the behavior changed.
+* Show `OrderIntegrationTests.completionCausesEventPublished(Scenario)` and discuss `Scenario` API.
+
+==== Observation
+* Eventually-consistent application module integration model
+* Support for integration testing such an integration
+
+==== Segue
+
+* How does that change the consistency guarantees?
+* What if an asynchronous, transactional event listener fails?
+
+=== Step 4 -- Event Publication Registry
+
+.Goals
+****
+After this step, you should understand…
+
+* … how handling events in an asynchronous, transactional event listener might be subject to data loss unless handled properly
+* … how to use Spring Modulith's event publication registry implementation to prevent this
+****
+
+==== Preparation
+* `$ git checkout step/4`
+
+==== Intro
+* Slides on transactional application events.
+
+==== Observations
+* Show added dependencies
+* Show `EventPublicationRegistryTests`
+** Registers a failing, asynchronous, transactional event listener
+* Execute `EventPublicationRegistryTests`
+** Log output shows registry tables created and populated
+** Shutdown shows outstanding event publications
+
+=== Step 5 -- Actuators
+
+.Goals
+****
+After this step you should understand…
+* … how the functional architecture implemented in the codebase can be exposed to the runtime platform.
+****
+
+==== Preparation
+* `$ git checkout step/5`
+
+==== Intro
+
+* Additional dependencies added in the POM.
+* `modulith` actuator was registered for web exposure in `application.properties`.
+
+==== Observations
+
+* Run the application with the _actuator_ profile enabled (`./mvnw spring-boot:run -Pactuator`).
+* Point the browser to http://localhost:8080/actuator.
+  Show how the `modulith` resource is exposed.
+  Follow the link and show how the JSON exposes the dependency structure in machine readable format.
+* Show in the logs how the actuators were bootstrapped and the Spring Modulith application module model was bootstrapped asynchronously.
+
+=== Step 6 -- Observability
+
+==== Preparation
+* `$ git checkout step/6`
+
+=== Step 7 -- Test optimizations
+
+==== Preparation
+* `$ git checkout step/7`
+
+==== Intro
+* Make change to inventory.
+* Run tests on the command line `./mvnw clean test`.
+
+==== Observations
+* Spring Modulith modifies test execution to only run tests that need to be executed.
+
+== Nerd Stuff
+
+A couple of useful scripts to be found in `etc`:
+
+* `prepare-talk.sh` -- opens a browser pointing to the documentation source file.
+Make sure you have an Asciidoctor plugin installed to let the rendered view show up.
+* `publish.sh` -- pushes current state, retags commits and pushes those as well.
+* `remove-remote-tags.sh` -- Removes all step tags from the remote repository.
+* `retag.sh` -- execute each time you change something about an individual commit to update the `steps/…` tags to be used in demos.
+* `test-all-commits.sh` -- runs the Maven build for all commits of the main branch.
+* `test-all-tags.sh` -- runs the Maven build for all `step/…` tags.
