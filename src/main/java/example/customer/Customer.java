@@ -15,20 +15,32 @@
  */
 package example.customer;
 
-import jakarta.persistence.Embeddable;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import example.customer.Customer.CustomerId;
+import lombok.Getter;
+import lombok.Value;
 
-import java.io.Serializable;
 import java.util.UUID;
 
-@Embeddable
-@EqualsAndHashCode
-@RequiredArgsConstructor(staticName = "of")
-@NoArgsConstructor(force = true)
-public class CustomerId implements Serializable {
+import org.jmolecules.ddd.types.AggregateRoot;
+import org.jmolecules.ddd.types.Identifier;
 
-	private static final long serialVersionUID = 1009997590119941755L;
-	private final UUID id;
+/**
+ * @author Oliver Drotbohm
+ */
+@Getter
+public class Customer implements AggregateRoot<Customer, CustomerId> {
+
+	private final CustomerId id;
+	private final String address;
+
+	public Customer(String address) {
+
+		this.id = CustomerId.of(UUID.randomUUID());
+		this.address = address;
+	}
+
+	@Value(staticConstructor = "of")
+	public static class CustomerId implements Identifier {
+		private final UUID customerId;
+	}
 }
