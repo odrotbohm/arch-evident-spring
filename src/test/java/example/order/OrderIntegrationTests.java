@@ -18,7 +18,7 @@ package example.order;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import example.customer.CustomerId;
+import example.customer.Customer.CustomerId;
 import example.inventory.Inventory;
 import lombok.RequiredArgsConstructor;
 

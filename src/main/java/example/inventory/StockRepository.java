@@ -15,12 +15,12 @@
  */
 package example.inventory;
 
-import org.springframework.stereotype.Repository;
+import org.jmolecules.ddd.annotation.Repository;
 
 /**
  * @author Oliver Drotbohm
  */
 @Repository
-public class StockRepository {
+class StockRepository {
 
 }

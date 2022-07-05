@@ -15,47 +15,40 @@
  */
 package example.order;
 
-import example.customer.CustomerId;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
+import example.customer.Customer;
+import example.customer.Customer.CustomerId;
+import example.order.Order.LineItem.LineItemId;
+import example.order.Order.OrderIdentifier;
 import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import lombok.Value;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.jmolecules.ddd.types.AggregateRoot;
+import org.jmolecules.ddd.types.Association;
+import org.jmolecules.ddd.types.Entity;
+import org.jmolecules.ddd.types.Identifier;
+
 /**
  * @author Oliver Drotbohm
  */
-@Entity
 @Getter
 @Table(name = "MyOrder")
-@EqualsAndHashCode(of = "id")
-@NoArgsConstructor(force = true)
-public class Order {
+public class Order implements AggregateRoot<Order, OrderIdentifier> {
 
-	private final @EmbeddedId OrderIdentifier id;
-	private final CustomerId customerId;
+	private final OrderIdentifier id = OrderIdentifier.of(UUID.randomUUID());
+	private final Association<Customer, CustomerId> customer;
 	private Status status;
 
-	@OneToMany(cascade = CascadeType.ALL) //
-	private final List<LineItem> lineItems;
+	private final List<LineItem> lineItems = new ArrayList<>();
 
 	public Order(CustomerId customerId) {
 
-		this.id = OrderIdentifier.of(UUID.randomUUID());
 		this.status = Status.OPEN;
-		this.customerId = customerId;
-		this.lineItems = new ArrayList<>();
+		this.customer = Association.forId(customerId);
 	}
 
 	Order complete() {
@@ -72,26 +65,19 @@ public class Order {
 		return this;
 	}
 
-	@Embeddable
-	@EqualsAndHashCode
-	@RequiredArgsConstructor(staticName = "of")
-	@NoArgsConstructor(force = true)
-	public static class OrderIdentifier implements Serializable {
-
-		private static final long serialVersionUID = 1009997590119941755L;
-		private final UUID orderId;
+	@Value(staticConstructor = "of")
+	public static class OrderIdentifier implements Identifier {
+		UUID orderId;
 	}
 
 	enum Status {
 		OPEN, COMPLETED, CANCELLED;
 	}
 
-	@Entity
 	@Getter
-	@NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)
-	static class LineItem {
+	static class LineItem implements Entity<Order, LineItemId> {
 
-		private @EmbeddedId LineItemId id;
+		private LineItemId id;
 		private String description;
 		private long amount;
 
@@ -102,14 +88,9 @@ public class Order {
 			this.amount = amount;
 		}
 
-		@Embeddable // remove
-		@EqualsAndHashCode
-		@RequiredArgsConstructor(staticName = "of")
-		@NoArgsConstructor(force = true, access = AccessLevel.PRIVATE) // remove
-		static class LineItemId implements Serializable {
-
-			private static final long serialVersionUID = 1009997590119941755L;
-			private final String lineItemId;
+		@Value(staticConstructor = "of")
+		static class LineItemId implements Identifier {
+			String lineItemId;
 		}
 	}
 }
