@@ -17,7 +17,7 @@ package example.inventory;
 
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.stereotype.Service;
+import org.jmolecules.ddd.annotation.Service;
 
 /**
  * @author Oliver Drotbohm
