@@ -28,7 +28,7 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 @Value
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE, onConstructor = @__(@ConstructorBinding))
 @ConfigurationProperties("example.inventory")
-public class InventorySettings {
+class InventorySettings {
 
 	/**
 	 * Some Javadoc.

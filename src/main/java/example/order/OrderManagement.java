@@ -15,12 +15,12 @@
  */
 package example.order;
 
-import example.customer.CustomerId;
+import example.customer.Customer.CustomerId;
 import example.inventory.Inventory;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.stereotype.Service;
+import org.jmolecules.ddd.annotation.Service;
 
 /**
  * @author Oliver Drotbohm
