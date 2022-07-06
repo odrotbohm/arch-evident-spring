@@ -16,17 +16,17 @@
 package example.order;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 import example.customer.Customer.CustomerIdentifier;
-import example.inventory.Inventory;
+import example.order.Order.OrderCompleted;
 import lombok.RequiredArgsConstructor;
 
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.modulith.test.ApplicationModuleTest;
+import org.springframework.modulith.test.AssertablePublishedEvents;
+import org.springframework.modulith.test.Scenario;
 
 /**
  * @author Oliver Drotbohm
@@ -37,8 +37,6 @@ class OrderIntegrationTests {
 
 	private final OrderManagement orders;
 	private final OrderRepository repository;
-
-	@MockBean Inventory inventory;
 
 	@Test
 	void bootstrapsOrderModule() {
@@ -57,12 +55,24 @@ class OrderIntegrationTests {
 	}
 
 	@Test
-	void orderCompletionTriggersInventoryUpdate() {
+	void completionCausesEventPublished(AssertablePublishedEvents events) {
 
 		var order = new Order(new CustomerIdentifier(UUID.randomUUID()));
 
 		orders.complete(order);
 
-		verify(inventory).updateStock();
+		assertThat(events).contains(OrderCompleted.class)
+				.matching(OrderCompleted::id, order.getId());
+	}
+
+	@Test
+	void completionCausesEventPublished(Scenario scenario) {
+
+		var order = new Order(new CustomerIdentifier(UUID.randomUUID()));
+
+		scenario.stimulate(() -> orders.complete(order))
+				.andWaitForEventOfType(OrderCompleted.class)
+				.matchingMappedValue(OrderCompleted::id, order.getId())
+				.toArrive();
 	}
 }
