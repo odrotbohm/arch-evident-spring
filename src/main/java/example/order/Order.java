@@ -30,13 +30,15 @@ import org.jmolecules.ddd.types.AggregateRoot;
 import org.jmolecules.ddd.types.Association;
 import org.jmolecules.ddd.types.Entity;
 import org.jmolecules.ddd.types.Identifier;
+import org.jmolecules.event.types.DomainEvent;
+import org.springframework.data.domain.AbstractAggregateRoot;
 
 /**
  * @author Oliver Drotbohm
  */
 @Getter
 @Table(name = "MyOrder")
-public class Order implements AggregateRoot<Order, OrderIdentifier> {
+public class Order extends AbstractAggregateRoot<Order> implements AggregateRoot<Order, OrderIdentifier> {
 
 	private final OrderIdentifier id;
 	private final Association<Customer, CustomerIdentifier> customer;
@@ -55,6 +57,8 @@ public class Order implements AggregateRoot<Order, OrderIdentifier> {
 
 		this.status = Status.COMPLETED;
 
+		registerEvent(new OrderCompleted(id));
+
 		return this;
 	}
 
@@ -66,6 +70,8 @@ public class Order implements AggregateRoot<Order, OrderIdentifier> {
 	}
 
 	public record OrderIdentifier(UUID id) implements Identifier {}
+
+	public record OrderCompleted(OrderIdentifier id) implements DomainEvent {}
 
 	enum Status {
 		OPEN, COMPLETED, CANCELLED;
