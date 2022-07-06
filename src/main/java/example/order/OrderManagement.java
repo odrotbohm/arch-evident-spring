@@ -16,7 +16,6 @@
 package example.order;
 
 import example.customer.Customer.CustomerIdentifier;
-import example.inventory.Inventory;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -31,16 +30,12 @@ import org.jmolecules.ddd.annotation.Service;
 public class OrderManagement {
 
 	private final OrderRepository orders;
-	private final Inventory inventory;
 
 	public Order create(CustomerIdentifier customerId) {
 		return new Order(customerId);
 	}
 
 	public Order complete(Order order) {
-
-		inventory.updateStock();
-
 		return orders.save(order.complete());
 	}
 }
