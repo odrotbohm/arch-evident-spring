@@ -52,6 +52,11 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.jmolecules</groupId>
+			<artifactId>jmolecules-events</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.jmolecules.integrations</groupId>
 			<artifactId>jmolecules-jpa</artifactId>
 			<scope>runtime</scope>
