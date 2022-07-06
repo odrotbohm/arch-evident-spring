@@ -16,17 +16,16 @@
 package example.order;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 import example.customer.Customer.CustomerId;
-import example.inventory.Inventory;
+import example.order.Order.OrderCompleted;
 import lombok.RequiredArgsConstructor;
 
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.moduliths.test.ModuleTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.moduliths.test.PublishedEvents;
 
 /**
  * @author Oliver Drotbohm
@@ -37,8 +36,6 @@ class OrderIntegrationTests {
 
 	private final OrderManagement orders;
 	private final OrderRepository repository;
-
-	@MockBean Inventory inventory;
 
 	@Test
 	void bootstrapsOrderModule() {
@@ -57,12 +54,14 @@ class OrderIntegrationTests {
 	}
 
 	@Test
-	void orderCompletionTriggersInventoryUpdate() {
+	void completionCausesEventPublished(PublishedEvents events) {
 
 		var order = new Order(CustomerId.of(UUID.randomUUID()));
 
 		orders.complete(order);
 
-		verify(inventory).updateStock();
+		assertThat(events.ofType(OrderCompleted.class)
+				.matching(it -> it.order().equals(order)))
+						.hasSize(1);
 	}
 }

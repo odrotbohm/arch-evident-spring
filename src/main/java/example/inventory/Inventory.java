@@ -15,9 +15,11 @@
  */
 package example.inventory;
 
+import example.order.Order.OrderCompleted;
 import lombok.RequiredArgsConstructor;
 
 import org.jmolecules.ddd.annotation.Service;
+import org.jmolecules.event.annotation.DomainEventHandler;
 
 /**
  * @author Oliver Drotbohm
@@ -29,7 +31,8 @@ public class Inventory {
 	/**
 	 * Updates the stock for all line items contained in the order.
 	 */
-	public void updateStock() {
+	@DomainEventHandler
+	void updateStock(OrderCompleted order) {
 
 	}
 }
