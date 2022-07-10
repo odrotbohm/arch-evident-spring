@@ -29,7 +29,7 @@
 			<dependency>
 				<groupId>org.springframework.experimental</groupId>
 				<artifactId>spring-modulith-bom</artifactId>
-				<version>0.3.0</version>
+				<version>0.4.0-SNAPSHOT</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -63,6 +63,10 @@
 		<dependency>
 			<groupId>org.jmolecules.integrations</groupId>
 			<artifactId>jmolecules-spring</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.experimental</groupId>
+			<artifactId>spring-modulith-starter-jpa</artifactId>
 		</dependency>
 
 		<dependency>
