@@ -64,6 +64,12 @@
 			<artifactId>moduliths-moments</artifactId>
 			<version>${moduliths.version}</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.moduliths</groupId>
+			<artifactId>moduliths-starter-jpa-jakarta</artifactId>
+			<version>${moduliths.version}</version>
+		</dependency>
 
 		<!-- Persistence -->
 
