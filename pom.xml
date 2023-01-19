@@ -116,6 +116,36 @@
 
 	</dependencies>
 
+	<profiles>
+		<profile>
+
+			<id>actuator</id>
+
+			<dependencies>
+
+				<!-- Actuator -->
+
+				<dependency>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-actuator</artifactId>
+					<scope>runtime</scope>
+				</dependency>
+
+				<dependency>
+					<groupId>org.springframework.modulith</groupId>
+					<artifactId>spring-modulith-actuator</artifactId>
+					<scope>runtime</scope>
+				</dependency>
+
+				<dependency>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-web</artifactId>
+				</dependency>
+
+			</dependencies>
+		</profile>
+	</profiles>
+
 	<build>
 
 		<defaultGoal>verify</defaultGoal>
