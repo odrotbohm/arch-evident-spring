@@ -15,17 +15,28 @@
  */
 package example.inventory;
 
+import static org.assertj.core.api.Assertions.*;
+
+import example.order.OrderManagement;
+import lombok.RequiredArgsConstructor;
+
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.modulith.test.ApplicationModuleTest;
 
 /**
  * @author Oliver Drotbohm
  */
+@RequiredArgsConstructor
 @ApplicationModuleTest
 class InventoryIntegrationTests {
+
+	private final ObjectProvider<OrderManagement> orders;
 
 	@Test
 	void bootstrapsInventoryModule() {
 
+		// Does not boot strap any components of order
+		assertThat(orders.getIfAvailable()).isNull();
 	}
 }
