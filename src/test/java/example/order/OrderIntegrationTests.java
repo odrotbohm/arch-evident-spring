@@ -15,10 +15,18 @@
  */
 package example.order;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import example.customer.Customer.CustomerIdentifier;
+import example.inventory.Inventory;
 import lombok.RequiredArgsConstructor;
+
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.modulith.test.ApplicationModuleTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
  * @author Oliver Drotbohm
@@ -27,8 +35,34 @@ import org.springframework.modulith.test.ApplicationModuleTest;
 @RequiredArgsConstructor
 class OrderIntegrationTests {
 
+	private final OrderManagement orders;
+	private final OrderRepository repository;
+
+	@MockitoBean Inventory inventory;
+
 	@Test
 	void bootstrapsOrderModule() {
 
+	}
+
+	@Test
+	void persistsAndLoadsOrder() {
+
+		var reference = repository.save(new Order(new CustomerIdentifier(UUID.randomUUID())));
+		var result = repository.findById(reference.getId());
+
+		// Equal but not the same
+		assertThat(result).hasValue(reference);
+		assertThat(result).hasValueSatisfying(it -> assertThat(it).isNotSameAs(reference));
+	}
+
+	@Test
+	void orderCompletionTriggersInventoryUpdate() {
+
+		var order = new Order(new CustomerIdentifier(UUID.randomUUID()));
+
+		orders.complete(order);
+
+		verify(inventory).updateStock();
 	}
 }
