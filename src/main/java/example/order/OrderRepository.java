@@ -15,32 +15,13 @@
  */
 package example.order;
 
-import example.customer.Customer.CustomerIdentifier;
-import example.inventory.Inventory;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
+import example.order.Order.OrderIdentifier;
 
-import org.jmolecules.ddd.annotation.Service;
+import org.springframework.data.repository.CrudRepository;
 
 /**
  * @author Oliver Drotbohm
  */
-@Transactional
-@Service
-@RequiredArgsConstructor
-public class OrderManagement {
+interface OrderRepository extends CrudRepository<Order, OrderIdentifier> {
 
-	private final OrderRepository orders;
-	private final Inventory inventory;
-
-	public Order create(CustomerIdentifier customerId) {
-		return new Order(customerId);
-	}
-
-	public Order complete(Order order) {
-
-		inventory.updateStock();
-
-		return orders.save(order.complete());
-	}
 }
