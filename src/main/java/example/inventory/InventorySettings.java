@@ -13,34 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package example.order;
+package example.inventory;
 
-import example.customer.Customer.CustomerIdentifier;
-import example.inventory.Inventory;
-import jakarta.transaction.Transactional;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 
-import org.jmolecules.ddd.annotation.Service;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.ConstructorBinding;
 
 /**
  * @author Oliver Drotbohm
  */
-@Transactional
-@Service
-@RequiredArgsConstructor
-public class OrderManagement {
+@Value
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE, onConstructor = @__(@ConstructorBinding))
+@ConfigurationProperties("example.inventory")
+class InventorySettings {
 
-	private final OrderRepository orders;
-	private final Inventory inventory;
-
-	public Order create(CustomerIdentifier customerId) {
-		return new Order(customerId);
-	}
-
-	public Order complete(Order order) {
-
-		inventory.updateStock();
-
-		return orders.save(order.complete());
-	}
+	/**
+	 * Some Javadoc.
+	 */
+	int stockThreshold;
 }
