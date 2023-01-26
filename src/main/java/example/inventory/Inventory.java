@@ -26,6 +26,9 @@ import org.jmolecules.ddd.annotation.Service;
 @RequiredArgsConstructor
 public class Inventory {
 
+	@SuppressWarnings("unused") //
+	private final InventoryRepository repository;
+
 	/**
 	 * Updates the stock for all line items contained in the order.
 	 */
