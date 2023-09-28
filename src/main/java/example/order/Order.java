@@ -30,6 +30,7 @@ import org.jmolecules.ddd.types.AggregateRoot;
 import org.jmolecules.ddd.types.Association;
 import org.jmolecules.ddd.types.Entity;
 import org.jmolecules.ddd.types.Identifier;
+import org.jmolecules.event.annotation.Externalized;
 import org.jmolecules.event.types.DomainEvent;
 import org.springframework.data.domain.AbstractAggregateRoot;
 
@@ -71,6 +72,7 @@ public class Order extends AbstractAggregateRoot<Order> implements AggregateRoot
 
 	public record OrderIdentifier(UUID id) implements Identifier {}
 
+	@Externalized("orders.OrderCompleted")
 	public record OrderCompleted(OrderIdentifier id) implements DomainEvent {}
 
 	enum Status {
