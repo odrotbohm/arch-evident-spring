@@ -26,6 +26,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.modulith.test.ApplicationModuleTest;
 import org.springframework.modulith.test.AssertablePublishedEvents;
+import org.springframework.modulith.test.Scenario;
 
 /**
  * @author Oliver Drotbohm
@@ -62,5 +63,16 @@ class OrderIntegrationTests {
 
 		assertThat(events).contains(OrderCompleted.class)
 				.matching(OrderCompleted::id, order.getId());
+	}
+
+	@Test
+	void completionCausesEventPublished(Scenario scenario) {
+
+		var order = new Order(new CustomerIdentifier(UUID.randomUUID()));
+
+		scenario.stimulate(() -> orders.complete(order))
+				.andWaitForEventOfType(OrderCompleted.class)
+				.matchingMappedValue(OrderCompleted::id, order.getId())
+				.toArrive();
 	}
 }
