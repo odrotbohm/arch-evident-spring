@@ -19,7 +19,7 @@ import example.order.Order.OrderCompleted;
 import lombok.RequiredArgsConstructor;
 
 import org.jmolecules.ddd.annotation.Service;
-import org.springframework.context.event.EventListener;
+import org.springframework.modulith.events.ApplicationModuleListener;
 
 /**
  * @author Oliver Drotbohm
@@ -34,7 +34,7 @@ public class Inventory {
 	/**
 	 * Updates the stock for all line items contained in the order.
 	 */
-	@EventListener
+	@ApplicationModuleListener
 	void updateStock(OrderCompleted order) {
 
 	}
