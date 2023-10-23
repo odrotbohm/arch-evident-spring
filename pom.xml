@@ -67,6 +67,11 @@
 			<artifactId>spring-modulith-starter-core</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.modulith</groupId>
+			<artifactId>spring-modulith-events-api</artifactId>
+		</dependency>
+
 		<!-- Persistence -->
 
 		<dependency>
