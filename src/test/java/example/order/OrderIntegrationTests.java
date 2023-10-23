@@ -64,4 +64,15 @@ class OrderIntegrationTests {
 		assertThat(events).contains(OrderCompleted.class)
 				.matching(OrderCompleted::id, order.getId());
 	}
+
+	@Test
+	void completionCausesEventPublished(Scenario scenario) {
+
+		var order = new Order(new CustomerIdentifier(UUID.randomUUID()));
+
+		scenario.stimulate(() -> orders.complete(order))
+				.andWaitForEventOfType(OrderCompleted.class)
+				.matchingMappedValue(OrderCompleted::id, order.getId())
+				.toArrive();
+	}
 }
