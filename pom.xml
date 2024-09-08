@@ -116,6 +116,12 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.modulith</groupId>
+			<artifactId>spring-modulith-junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 		<!-- Infrastructure -->
 
 		<dependency>
