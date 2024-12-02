@@ -19,7 +19,7 @@ After this step you should…
 ****
 
 ==== Preparation
-* `$ git checkout step/0`
+* `$ git checkout steps/0`
 * Run `./etc/prepare-talk.sh` (Opens `src/main/asciidoc/index.adoc` in browser with Asciidoctor plugin installed).
 
 ==== Application Overview
@@ -81,7 +81,7 @@ After this step you should understand…
 ****
 
 ==== Preparation
-* `$ git checkout step/1`
+* `$ git checkout steps/1`
 * Run `ModularityTests.renderDocumentation()`.
 
 ==== Intro
@@ -112,7 +112,7 @@ After this step, you should understand…
 ****
 
 ==== Preparation
-* `$ git checkout step/2`
+* `$ git checkout steps/2`
 * Run `ModularityTests.renderDocumentation()`.
 
 ==== Intro
@@ -131,7 +131,7 @@ After this step, you should understand…
 === Step 3 -- Switch to `@ApplicationModuleListener`
 
 ==== Preparation
-* `$ git checkout step/3`
+* `$ git checkout steps/3`
 * Run `ModularityTests.renderDocumentation()`.
 
 ==== Intro
@@ -158,7 +158,7 @@ After this step, you should understand…
 ****
 
 ==== Preparation
-* `$ git checkout step/4`
+* `$ git checkout steps/4`
 
 ==== Intro
 * Slides on transactional application events.
@@ -180,7 +180,7 @@ After this step you should understand…
 ****
 
 ==== Preparation
-* `$ git checkout step/5`
+* `$ git checkout steps/5`
 
 ==== Intro
 
@@ -198,12 +198,12 @@ After this step you should understand…
 === Step 6 -- Observability
 
 ==== Preparation
-* `$ git checkout step/6`
+* `$ git checkout steps/6`
 
 === Step 7 -- Test optimizations
 
 ==== Preparation
-* `$ git checkout step/7`
+* `$ git checkout steps/7`
 
 ==== Intro
 * Make change to inventory.
