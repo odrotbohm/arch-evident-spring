@@ -23,6 +23,7 @@ import example.order.EventPublicationRegistryTests.FailingAsyncTransactionalEven
 import example.order.Order.OrderCompleted;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.util.UUID;
 
@@ -30,6 +31,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Import;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.modulith.events.EventExternalized;
+import org.springframework.modulith.events.FailedEventPublications;
+import org.springframework.modulith.events.ResubmissionOptions;
 import org.springframework.modulith.events.core.EventPublicationRegistry;
 import org.springframework.modulith.test.ApplicationModuleTest;
 import org.springframework.modulith.test.Scenario;
@@ -48,6 +51,7 @@ class EventPublicationRegistryTests {
 
 	private final OrderManagement orders;
 	private final EventPublicationRegistry registry;
+	private final FailedEventPublications failed;
 	private final FailingAsyncTransactionalEventListener listener;
 
 	@Test
@@ -58,17 +62,26 @@ class EventPublicationRegistryTests {
 		scenario.stimulate(() -> orders.complete(order))
 				.andWaitForEventOfType(EventExternalized.class)
 				.toArriveAndVerify(__ -> {
+
 					assertThat(listener.getEx()).isNotNull();
 					assertThat(registry.findIncompletePublications()).hasSize(1);
+
+					listener.setFail(false);
+					failed.resubmit(ResubmissionOptions.defaults());
 				});
 	}
 
 	static class FailingAsyncTransactionalEventListener {
 
 		@Getter Exception ex;
+		@Setter boolean fail = true;
 
 		@ApplicationModuleListener
 		void on(OrderCompleted event) throws Exception {
+
+			if (!fail) {
+				return;
+			}
 
 			var exception = new IllegalStateException();
 

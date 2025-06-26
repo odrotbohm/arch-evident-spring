@@ -11,6 +11,7 @@
 	</root>
 
 	<logger name="com.tngtech.archunit" level="WARN" />
+	<logger name="org.springframework.jdbc.core" level="DEBUG" />
 	<logger name="org.springframework.modulith" level="DEBUG" />
 
 </configuration>
