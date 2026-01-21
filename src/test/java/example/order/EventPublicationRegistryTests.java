@@ -17,6 +17,7 @@ package example.order;
 
 import static org.assertj.core.api.Assertions.*;
 
+import example.TestApplication;
 import example.customer.Customer.CustomerIdentifier;
 import example.order.EventPublicationRegistryTests.FailingAsyncTransactionalEventListener;
 import example.order.Order.OrderCompleted;
@@ -36,14 +37,16 @@ import org.springframework.modulith.events.core.EventPublicationRegistry;
 import org.springframework.modulith.test.ApplicationModuleTest;
 import org.springframework.modulith.test.Scenario;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 
 /**
  * @author Oliver Drotbohm
  */
 @ApplicationModuleTest
 @RequiredArgsConstructor
-@Import(FailingAsyncTransactionalEventListener.class)
+@Import({ FailingAsyncTransactionalEventListener.class, TestApplication.class })
 @DirtiesContext
+@TestPropertySource(properties = "spring.modulith.events.externalization.enabled=true")
 class EventPublicationRegistryTests {
 
 	private final OrderManagement orders;
@@ -57,8 +60,8 @@ class EventPublicationRegistryTests {
 		var order = new Order(new CustomerIdentifier(UUID.randomUUID()));
 
 		scenario.stimulate(() -> orders.complete(order))
-				.andWaitForStateChange(() -> listener.getEx())
-				.andVerify(_ -> {
+				.andWaitForEventOfType(EventExternalized.class)
+				.toArriveAndVerify(_ -> {
 
 					assertThat(listener.getEx()).isNotNull();
 					assertThat(registry.findIncompletePublications()).hasSize(1);
